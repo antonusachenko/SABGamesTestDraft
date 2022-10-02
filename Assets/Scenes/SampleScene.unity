@@ -563,6 +563,29 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2034229288 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2767578025121027076, guid: b0f26a638f7579c4aad98280696deb61, type: 3}
+  m_PrefabInstance: {fileID: 2767578023947553924}
+  m_PrefabAsset: {fileID: 0}
+--- !u!143 &2034229294
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034229288}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 0.6
+  m_Radius: 0.15
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.3, z: 0}
 --- !u!850595691 &2066956945
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -632,6 +655,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2767578024960414977, guid: b0f26a638f7579c4aad98280696deb61, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.457
+      objectReference: {fileID: 0}
+    - target: {fileID: 2767578024960414977, guid: b0f26a638f7579c4aad98280696deb61, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.12
+      objectReference: {fileID: 0}
     - target: {fileID: 2767578025121027076, guid: b0f26a638f7579c4aad98280696deb61, type: 3}
       propertyPath: m_Name
       value: Mob
@@ -646,7 +677,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2767578025121027077, guid: b0f26a638f7579c4aad98280696deb61, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.893
       objectReference: {fileID: 0}
     - target: {fileID: 2767578025121027077, guid: b0f26a638f7579c4aad98280696deb61, type: 3}
       propertyPath: m_LocalPosition.z
