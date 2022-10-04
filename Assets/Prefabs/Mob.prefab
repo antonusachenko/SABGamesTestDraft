@@ -109,7 +109,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2767578024960414976}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.457, z: -0.106}
+  m_LocalPosition: {x: 0, y: 0.457, z: 0.12}
   m_LocalScale: {x: 0.28037328, y: 0.28037328, z: 0.28037328}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -176,9 +176,11 @@ GameObject:
   m_Component:
   - component: {fileID: 2767578025121027077}
   - component: {fileID: 2767578023947553926}
+  - component: {fileID: 2034229294}
+  - component: {fileID: 2034229295}
   m_Layer: 0
   m_Name: Mob
-  m_TagString: Untagged
+  m_TagString: Mob
   m_Icon: {fileID: 4422084297763085224, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -212,7 +214,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d8697e1908855f4ba29aa85034874dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isUnderControl: 0
   _gizmosThickness: 5
   _gizmosOffset: 0
   _searchRadius: 2.3
   _walkRadiusAsSearch: 1
+--- !u!143 &2034229294
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2767578025121027076}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 0.6
+  m_Radius: 0.15
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.3, z: 0}
+--- !u!135 &2034229295
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2767578025121027076}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 1
+  m_Center: {x: 0, y: 0, z: 0}
