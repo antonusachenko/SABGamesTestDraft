@@ -305,8 +305,6 @@ public class Mob : MonoBehaviour
         {
             _moveVector = Vector3.zero;
             _mobState = MobState.FIGHT;
-            Debug.Log(gameObject.name + " reached its destination");
-            Debug.Log(gameObject.name + " check _enemyMob before FIGHT state: " + _enemyMob);
         }
     }
 
