@@ -86,15 +86,16 @@ public class Mob : MonoBehaviour
     private float _timerWaitToDie;
     private float _timerChangeColor;
     private GameObject _enemy;
-    private Mob _enemyMobComponent;
+    private Mob _enemyMob;
     private Material _Material;
+    private Material _Material2;
     private Color _BodyColor;
 
     //Character Controller
     private CharacterController _controller;
     private Vector3 _playerVelocity;
     private bool _groundedPlayer;
-    private float _jumpHeight = 1.0f;
+    private float _jumpHeight = 0.5f;
     private float _gravityValue = -9.81f;
     private Vector3 _moveVector;
     
@@ -133,31 +134,33 @@ public class Mob : MonoBehaviour
 
         set
         {
-            if (value != null && value.TryGetComponent(out Mob mobComponent))
+            if (value != null)
             {
                 _enemy = value;
-                _mobState = MobState.CHASE;
-                _targetPositionReached = false;
             }
         }
     }
 
 
 
-    public bool GetDamage(float value)
+    public bool TakeDamage(float value)
     {
         _health -= value;
         bool resultOfDamage = false;
-        if(_health <= 0)
+        ChangeColorTemporaly(true);
+        _playerVelocity.y += Mathf.Sqrt(_jumpHeight * -1.0f * _gravityValue);
+        if (_health <= 0)
         {
-            _health = 0;
             resultOfDamage = true;
+            _health = 0;
+            _moveVector = Vector3.zero;
             _mobState = MobState.DEATH;
             _timerWaitToDie = 1f;
             ChangeColorTemporaly(true);
         }
         return resultOfDamage;
     }
+    
 
     
 
@@ -175,7 +178,9 @@ public class Mob : MonoBehaviour
 
         _MobSearchTrigger = GetComponent<SphereCollider>();
         _MobSearchTrigger.radius = _searchRadius;
-        _Material = GetComponent<Renderer>().sharedMaterial;
+        //_Material = GetComponent<Renderer>().sharedMaterial;
+        _Material = gameObject.transform.GetChild(0).GetComponent<Renderer>().material;
+        _Material2 = gameObject.transform.GetChild(1).GetComponent<Renderer>().material;
         _BodyColor = _Material.color;
     }
 
@@ -215,46 +220,75 @@ public class Mob : MonoBehaviour
 
     void MobSearching()
     {
-        ///move to start pos if _walkRadius true and mob distance > then walk radius
-        ///  not done, need integrate in moveRandomly()
-
         ///move randomly
         if(!_isUnderControl)
             MoveRandomly();
 
-        ///check trigger on enemy 
-        ///  if enemy in SEARCH state - set first right variant enemy in member
-        ///  set CHASE state
-        ///  -> (made in CheckContactAndSetEnemy() )
-
     }
 
-    void OnTriggerEnter(Collider other)
+    //void OnTriggerEnter(Collider other)
+    //{
+    //    if (_mobState == MobState.SEARCH)
+    //        CheckContactAndSetEnemy(other);
+    //}
+
+    private void OnTriggerStay(Collider other)
     {
-        CheckContactAndSetEnemy(other);
+        if(_mobState == MobState.SEARCH)
+            CheckContactAndSetEnemy(other);
     }
 
     void CheckContactAndSetEnemy(Collider other)
     {
-        if (other.gameObject.TryGetComponent(out Mob otherMobComponentCache))
-            _enemyMobComponent = otherMobComponentCache;
-
         
-
-        if (other.CompareTag("Mob") &&
-           otherMobComponentCache.Mob_State == MobState.SEARCH &&
-           _mobState == MobState.SEARCH &&
-           gameObject.name != other.gameObject.name)
+        if (gameObject.name != other.gameObject.name && 
+            other.gameObject.TryGetComponent(out Mob mob))
         {
-            Debug.Log(other.gameObject.name + " 's collider detected by " + gameObject.name);
+            if(_enemy == other.gameObject)
+            {
+                _enemyMob = mob; 
+                _mobState = MobState.CHASE;
 
-            _enemy = other.gameObject;
-            _mobState = MobState.CHASE;
-            otherMobComponentCache.Enemy = gameObject;
-            _targetPositionReached = false;
+                Debug.Log(gameObject.name + " CHASE if1 ");
+            }
+            else if (_enemy != null && _enemy != other.gameObject)
+            {
+                _enemyMob = _enemy.GetComponent<Mob>();
+                _mobState = MobState.CHASE;
+
+                Debug.Log(gameObject.name + " CHASE if2 ");
+            }
+            else if (_enemy == null)
+            {
+                if(mob.Enemy == null)
+                {
+                    mob.Enemy = gameObject;
+                    _enemy = other.gameObject;
+                    Debug.Log(gameObject.name + " CHASE if3-1 ");
+
+                }
+                else if(mob.Enemy == gameObject)
+                {
+                    _enemy = other.gameObject;
+                    _enemyMob = mob;
+                    _mobState = MobState.CHASE;
+
+                    Debug.Log(gameObject.name + " CHASE if3-2 ");
+                }
+                else
+                {
+                    Debug.Log(gameObject.name +" sad and wait invite");
+                }
+
+            }
+            else
+            {
+                Debug.Log("BIG ERROR 1000");
+            }
+
         }
-    }
 
+    }
 
 
     void MoveRandomly()
@@ -318,6 +352,7 @@ public class Mob : MonoBehaviour
             _moveVector = Vector3.zero;
             _mobState = MobState.FIGHT;
             Debug.Log(gameObject.name + " reached its destination");
+            Debug.Log(gameObject.name + " check _enemyMob before FIGHT state: " + _enemyMob);
         }
     }
 
@@ -327,7 +362,9 @@ public class Mob : MonoBehaviour
         ///set damage to enemy
         if(_timerWaitToAttack <= 0)
         {
-            enemyDied = _enemyMobComponent.GetDamage(_damage);
+            Debug.Log(gameObject.name + " check _enemyMob before attack: " + _enemyMob);
+
+            enemyDied = _enemyMob.TakeDamage(_damage);
             _timerWaitToAttack = _damage / 20;
         }
 
@@ -335,12 +372,15 @@ public class Mob : MonoBehaviour
         if (enemyDied)
         {
             _mobState = MobState.SEARCH;
+            _enemy = null;
+            _enemyMob = null;
         }
         
     }
 
     void MobDeath()
     {
+        
         // need add physics effect
         if (_timerWaitToDie <= 0)
             Destroy(gameObject);
@@ -348,31 +388,36 @@ public class Mob : MonoBehaviour
 
     void CharacterControllerPhysics()
     {
-        _groundedPlayer = _controller.isGrounded;
-        if (_groundedPlayer && _playerVelocity.y < 0)
+        if (_mobState != MobState.DEATH)
         {
-            _playerVelocity.y = 0f;
-        }
-        if (_isUnderControl)
-        {
-            _moveVector = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        }
+            _groundedPlayer = _controller.isGrounded;
+            if (_groundedPlayer && _playerVelocity.y < 0)
+            {
+                _playerVelocity.y = 0f;
+            }
+            if (_isUnderControl)
+            {
+                _moveVector = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            }
 
-        _controller.Move(_moveVector * Time.deltaTime * _playerSpeed);
+            _controller.Move(_moveVector * Time.deltaTime * _playerSpeed);
 
-        if (_moveVector != Vector3.zero )
-        {
-            transform.forward = Vector3.Lerp(transform.forward, _moveVector, _rotateSpeed);
+            if (_moveVector != Vector3.zero)
+            {
+                transform.forward = Vector3.Lerp(transform.forward, _moveVector, _rotateSpeed);
+            }
+
+            // Changes the height position of the player..
+            if (Input.GetButtonDown("Jump") && _groundedPlayer && _isUnderControl)
+            {
+                _playerVelocity.y += Mathf.Sqrt(_jumpHeight * -3.0f * _gravityValue);
+            }
+
+            _playerVelocity.y += _gravityValue * Time.deltaTime;
+            _controller.Move(_playerVelocity * Time.deltaTime);
         }
-
-        // Changes the height position of the player..
-        if (Input.GetButtonDown("Jump") && _groundedPlayer && _isUnderControl)
-        {
-            _playerVelocity.y += Mathf.Sqrt(_jumpHeight * -3.0f * _gravityValue);
-        }
-
-        _playerVelocity.y += _gravityValue * Time.deltaTime;
-        _controller.Move(_playerVelocity * Time.deltaTime);
+        else
+            transform.Rotate(transform.right, -0.4f);
     }
 
     void CalcTimers()
@@ -386,7 +431,7 @@ public class Mob : MonoBehaviour
         if (_timerWaitToDie >= 0)
             _timerWaitToDie -= Time.deltaTime;
 
-        if (_timerChangeColor >= 0)
+        if (_timerChangeColor > 0)
         {
             _timerChangeColor -= Time.deltaTime;
             if (_timerChangeColor <= 0)
@@ -397,9 +442,16 @@ public class Mob : MonoBehaviour
     private void ChangeColorTemporaly(bool value)
     {
         if (value)
+        {
             _Material.color = Color.red;
+            _Material2.color = Color.red;
+            _timerChangeColor = 0.1f;
+        }
         else
+        {
             _Material.color = _BodyColor;
+            _Material2.color = _BodyColor;
+        }
 
     }
 }
