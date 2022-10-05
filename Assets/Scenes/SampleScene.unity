@@ -442,7 +442,7 @@ PrefabInstance:
       objectReference: {fileID: 2767578025121027076, guid: b0f26a638f7579c4aad98280696deb61, type: 3}
     - target: {fileID: 2987322705577403451, guid: 38b963f3ebe74444e8b61461d8e9fe64, type: 3}
       propertyPath: _mobCount
-      value: 9
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2987322705577403451, guid: 38b963f3ebe74444e8b61461d8e9fe64, type: 3}
       propertyPath: _spawnRadius

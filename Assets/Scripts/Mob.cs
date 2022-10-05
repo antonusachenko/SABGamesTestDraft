@@ -160,6 +160,7 @@ public class Mob : MonoBehaviour
         _playerSpeed = Random.Range(0.5f, 1.5f);
         _rotateSpeed = Random.Range(0.1f, 0.2f);
         _damage = Random.Range(20f, 60f);
+        _health = Random.Range(80f, 120f);
 
         _MobSearchTrigger = GetComponent<SphereCollider>();
         _MobSearchTrigger.radius = _searchRadius;
