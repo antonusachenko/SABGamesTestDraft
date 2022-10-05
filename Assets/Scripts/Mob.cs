@@ -116,18 +116,6 @@ public class Mob : MonoBehaviour
     public bool Walk_R_as_Search_R => _walkRadiusAsSearch;
     public bool Started => _isStarted;
     public MobState Mob_State => _mobState;
-    //public MobState Mob_State  // UNDER NEED TO DELETE
-    //{
-    //    get{return _mobState;}
-
-    //    set
-    //    {
-    //        if (value == MobState.SEARCH ||
-    //            value == MobState.CHASE ||
-    //            value == MobState.FIGHT)
-    //            _mobState = value;
-    //    }
-    //}
     public GameObject Enemy
     {
         get { return _enemy; }
@@ -140,7 +128,6 @@ public class Mob : MonoBehaviour
             }
         }
     }
-
 
 
     public bool TakeDamage(float value)
@@ -162,15 +149,13 @@ public class Mob : MonoBehaviour
     }
     
 
-    
-
     void Start()
     {
         _startPosition = transform.position;
         _mobState = MobState.SEARCH;
         _controller = GetComponent<CharacterController>();
         _isStarted = true;
-        _mobThickness = _controller.radius * 2f * 1.3f;
+        _mobThickness = _controller.radius * 2f * 1.5f;
 
         _playerSpeed = Random.Range(0.5f, 1.5f);
         _rotateSpeed = Random.Range(0.1f, 0.2f);
@@ -178,7 +163,6 @@ public class Mob : MonoBehaviour
 
         _MobSearchTrigger = GetComponent<SphereCollider>();
         _MobSearchTrigger.radius = _searchRadius;
-        //_Material = GetComponent<Renderer>().sharedMaterial;
         _Material = gameObject.transform.GetChild(0).GetComponent<Renderer>().material;
         _Material2 = gameObject.transform.GetChild(1).GetComponent<Renderer>().material;
         _BodyColor = _Material.color;
@@ -186,20 +170,6 @@ public class Mob : MonoBehaviour
 
     void Update()
     {
-        /*
-        switch (_mobState) 
-        {
-            case MobState.SEARCH:
-                //func
-                break;
-
-            case MobState.FIGHT:
-                //func
-                break;
-        }
-        */
-
-
         if (_mobState == MobState.SEARCH)
             MobSearching();
         else if (_mobState == MobState.CHASE)
@@ -209,28 +179,16 @@ public class Mob : MonoBehaviour
         else
             MobDeath();
 
-
-
         CharacterControllerPhysics();
         CalcTimers();
-        
-
-        DebugPlus.LogOnScreen(gameObject.name + " in " + _mobState);
     }
 
     void MobSearching()
     {
-        ///move randomly
         if(!_isUnderControl)
             MoveRandomly();
-
     }
 
-    //void OnTriggerEnter(Collider other)
-    //{
-    //    if (_mobState == MobState.SEARCH)
-    //        CheckContactAndSetEnemy(other);
-    //}
 
     private void OnTriggerStay(Collider other)
     {
@@ -248,15 +206,11 @@ public class Mob : MonoBehaviour
             {
                 _enemyMob = mob; 
                 _mobState = MobState.CHASE;
-
-                Debug.Log(gameObject.name + " CHASE if1 ");
             }
             else if (_enemy != null && _enemy != other.gameObject)
             {
                 _enemyMob = _enemy.GetComponent<Mob>();
                 _mobState = MobState.CHASE;
-
-                Debug.Log(gameObject.name + " CHASE if2 ");
             }
             else if (_enemy == null)
             {
@@ -264,20 +218,16 @@ public class Mob : MonoBehaviour
                 {
                     mob.Enemy = gameObject;
                     _enemy = other.gameObject;
-                    Debug.Log(gameObject.name + " CHASE if3-1 ");
-
                 }
                 else if(mob.Enemy == gameObject)
                 {
                     _enemy = other.gameObject;
                     _enemyMob = mob;
                     _mobState = MobState.CHASE;
-
-                    Debug.Log(gameObject.name + " CHASE if3-2 ");
                 }
                 else
                 {
-                    Debug.Log(gameObject.name +" sad and wait invite");
+                    ///Debug.Log(gameObject.name +" sad and wait invite");
                 }
 
             }
@@ -332,11 +282,15 @@ public class Mob : MonoBehaviour
 
     void MobChase()
     {
+        if (_enemy == null)
+            _mobState = MobState.SEARCH;
+
         ///going to enemy
         var target = _enemy.gameObject.transform.position;
-        float distance = Vector3.Distance(transform.position, target);
+        ///float distance = Vector3.Distance(transform.position, target);
+        float distance = Vector3.Distance(new Vector3(transform.position.x,0,transform.position.z),
+                                            new Vector3(target.x,0,target.z));
 
-        DebugPlus.LogOnScreen(gameObject.name + " need to go " + distance + " meters more");
 
         ///then set FIGHT state when enemy is near
         if (distance >= _mobThickness)
@@ -358,30 +312,37 @@ public class Mob : MonoBehaviour
 
     void MobFighting()
     {
-        bool enemyDied = false;
-        ///set damage to enemy
-        if(_timerWaitToAttack <= 0)
-        {
-            Debug.Log(gameObject.name + " check _enemyMob before attack: " + _enemyMob);
-
-            enemyDied = _enemyMob.TakeDamage(_damage);
-            _timerWaitToAttack = _damage / 20;
-        }
-
-        ///set SEARCH state if enemy is dead
-        if (enemyDied)
-        {
+        if (_enemy == null)
             _mobState = MobState.SEARCH;
-            _enemy = null;
-            _enemyMob = null;
+        else
+        {
+            bool enemyDied = false;
+
+            ///look at enemy in fight
+            Vector3 lookAtEnemy = _enemy.transform.position - transform.position;
+            transform.forward = new Vector3(lookAtEnemy.x, 0, lookAtEnemy.z);
+
+            ///set damage to enemy
+            if (_timerWaitToAttack <= 0)
+            {
+                enemyDied = _enemyMob.TakeDamage(_damage);
+                _timerWaitToAttack = _damage / 20;
+            }
+
+
+            ///set SEARCH state if enemy is dead
+            if (enemyDied)
+            {
+                _mobState = MobState.SEARCH;
+                _enemy = null;
+                _enemyMob = null;
+            }
         }
-        
+
     }
 
     void MobDeath()
     {
-        
-        // need add physics effect
         if (_timerWaitToDie <= 0)
             Destroy(gameObject);
     }
